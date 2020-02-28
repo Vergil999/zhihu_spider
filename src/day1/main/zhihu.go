@@ -89,10 +89,10 @@ func postCapture(capture string) {
 /**
 计算签名
 */
-func getSinature(password string, timestamp *time.Time) string {
+func getSinature(timestamp time.Time) string {
 	key := "d1b964811afb40118a12068ff74a12f4"
 	a := hmac.New(sha1.New, []byte(key))
-	a.Write([]byte(password))
+	a.Write([]byte("password"))
 	a.Write([]byte("c3cef7c66a1843f8b3a9e6a1e3160e20"))
 	a.Write([]byte("com.zhihu.web"))
 	a.Write([]byte(string(timestamp.UnixNano())))
@@ -103,7 +103,7 @@ func getSinature(password string, timestamp *time.Time) string {
 /**
 知乎登陆
 */
-func login(timestamp *time.Time, signature string, username string, password string, captcha string) {
+func login(timestamp time.Time, signature string, username string, password string, captcha string) {
 	var param map[string]string
 	param = make(map[string]string)
 	param["client_id"] = "c3cef7c66a1843f8b3a9e6a1e3160e20"
@@ -113,22 +113,30 @@ func login(timestamp *time.Time, signature string, username string, password str
 	param["signature"] = signature
 	param["username"] = username
 	param["password"] = password
-	param["captcha"] = captcha
+	if captcha != "nil" {
+		param["captcha"] = captcha
+	}
 	param["lang"] = "en"
-	data,err := json.Marshal(param)
-	if err != nil{
+	data, err := json.Marshal(param)
+	if err != nil {
 		fmt.Println("json转换失败")
 	}
 	jsonStr := string(data)
 	var r = strings.NewReader(jsonStr)
 	client := http.Client{}
-	request,err := http.NewRequest("POST","https://www.zhihu.com/api/v3/oauth/sign_in",r)
+	request, err := http.NewRequest("POST", "https://www.zhihu.com/api/v3/oauth/sign_in", r)
 	request.Header.Add("User-Agent", `Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Mobile Safari/537.36`)
-	resp,err := client.Do(request)
-	if err != nil{
+	request.Header.Add("content-type", `application/x-www-form-urlencoded`)
+	resp, err := client.Do(request)
+	if err != nil {
 		fmt.Println("请求失败")
 	}
-	resp.Body
+	defer resp.Body.Close()
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+
+	}
+	fmt.Println(string(b))
 
 }
 

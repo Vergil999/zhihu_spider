@@ -24,6 +24,11 @@ func main() {
 		postCapture(capture)
 
 	}
+	username := "lyq7845@126.com"
+	password := "wh46201520"
+	timestamp := time.Now()
+	sinature := getSinature(timestamp)
+	login(timestamp,sinature,username,password,"nil")
 
 
 }
